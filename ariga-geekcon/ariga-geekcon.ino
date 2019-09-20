@@ -1,14 +1,19 @@
-#include <Servo.h> // TODO: replace
+
 
 boolean DEBUG = false;
 
-int MOTOR_PIN = A2; // TODO
-int ENDSTOPS_PINS[2] = { 3, 4 };
-int TARGET_PIN = 2;
-boolean headed_to_motor = true;
-Servo motor; // TODO: replace
-int currServoAngle = 90; // TODO
+int MOTOR_DIR_PINS[2] = {5, 6};
+int MOTOR_SPEED_PIN = 8;
+int MOTOR_SPEED = 255;
+int MOTOR_ENABLE_PIN = A6;
 
+int ENDSTOPS_PINS[2] = { 9, 10 };
+
+int TARGET_PIN = 12;
+
+boolean headed_to_motor = true;
+
+/* FUNCTIONS */
 
 void roll(boolean toMotor = true) {
 
@@ -20,30 +25,37 @@ void roll(boolean toMotor = true) {
   boolean hit_endpoint = false;
   int timeout = 1000;
 
-  currServoAngle = 90;
-  motor.write(currServoAngle);
-
-  while (hit_endpoint == false && timeout > 0 && currServoAngle>=0 && currServoAngle<180) {
+  // Move while we want to
+  while (hit_endpoint == false && timeout > 0) {
     timeout--;
+
     if (DEBUG == true) {
       Serial.println("ROLL");
     }
+    
     hit_endpoint = digitalRead(ENDSTOPS_PINS[0]) == HIGH || digitalRead(ENDSTOPS_PINS[1]) == HIGH; // messy
+
     if (DEBUG == true) {
       if (hit_endpoint)
         Serial.print("HIT ");
         Serial.print((digitalRead(ENDSTOPS_PINS[0])==HIGH ? "yes " : "no "));
         Serial.print((digitalRead(ENDSTOPS_PINS[1])==HIGH ? "yes " : "no "));
         Serial.println("");
-        delay(200);
     }
+    
+    delay(200);
 
-    if (toMotor)
-      currServoAngle++;
-    else
-      currServoAngle--;
-    motor.write(currServoAngle); 
-    delay(30); // FOR DEBUG
+    // move
+    if (toMotor) {
+      // TODO: guessing direction. Could be other way.
+      digitalWrite(MOTOR_DIR_PINS[0], HIGH);
+      digitalWrite(MOTOR_DIR_PINS[1], LOW);
+    }
+    else {
+      digitalWrite(MOTOR_DIR_PINS[0], LOW);
+      digitalWrite(MOTOR_DIR_PINS[1], HIGH);
+    }
+    // Finished step, continue while loop
   }
   
   if (DEBUG == true) {
@@ -55,6 +67,13 @@ void roll(boolean toMotor = true) {
   }
 
 
+}
+
+void stopRoll() {
+  if (DEBUG == true)
+    Serial.println("STOP");
+   digitalWrite(MOTOR_DIR_PINS[0], LOW);
+   digitalWrite(MOTOR_DIR_PINS[1], LOW);
 }
 
 boolean was_target_hit() {
@@ -71,20 +90,23 @@ boolean was_target_hit() {
 }
 
 void setup() {
-  pinMode(MOTOR_PIN, OUTPUT);
-  for (int i=0; i<2; i++) 
+
+  for (int i=0; i<2; i++)
     pinMode(ENDSTOPS_PINS[i], INPUT);
+
+  for (int i=0; i<2; i++)
+    pinMode(MOTOR_DIR_PINS[i], OUTPUT);
+  pinMode(MOTOR_SPEED_PIN, OUTPUT);
+  pinMode(MOTOR_ENABLE_PIN, OUTPUT);
+  digitalWrite(MOTOR_ENABLE_PIN, HIGH);
+    
   pinMode(TARGET_PIN, INPUT);
 
   if (DEBUG == true) {
      Serial.begin(9600);
   }
-
-  motor.attach(MOTOR_PIN); // TODO: replace
-  motor.write(0);
-  delay(200);
-  motor.write(90);
-  delay(200);
+  
+  analogWrite(MOTOR_SPEED_PIN, MOTOR_SPEED);
 }
 
 void loop() {
@@ -102,7 +124,7 @@ void loop() {
 
   headed_to_motor = !headed_to_motor;
   roll(headed_to_motor);
-
+  stopRoll();
   //delay(500);
   
 
