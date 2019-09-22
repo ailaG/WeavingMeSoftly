@@ -1,7 +1,8 @@
+/* Code to move the motor for the warp frame */
 
+bool DEBUG = false;
 
-boolean DEBUG = false;
-
+/* SETTINGS */
 int MOTOR_DIR_PINS[2] = {5, 6};
 int MOTOR_SPEED_PIN = 8;
 int MOTOR_SPEED = 255;
@@ -12,18 +13,20 @@ int MOVEMENT_MAX_INTERVAL = 30 * 1000; // Milliseconds. Timeout in case the moto
 
 int TARGET_PIN = 12;
 
-boolean headed_to_motor = true;
+/* GLOBAL VARIABLES */
+
+bool headed_to_motor = true;
 
 /* FUNCTIONS */
 
-void roll(boolean toMotor = true) {
+void roll(bool toMotor = true) {
 
   if (DEBUG == true) {
     Serial.print("rolling to motor? ");
     Serial.println(toMotor);
   }
 
-  boolean hit_endpoint = false;
+  bool hit_endpoint = false;
   int timeout = millis() + MOVEMENT_MAX_INTERVAL;
 
   // Move while we want to
@@ -77,7 +80,7 @@ void roll(boolean toMotor = true) {
 
 
 
-boolean was_target_hit() {
+bool was_target_hit() {
   if (DEBUG == true) {
     Serial.print("was_target_hit output: ");
     Serial.println((digitalRead(TARGET_PIN)==HIGH) ? "true" : "false");
