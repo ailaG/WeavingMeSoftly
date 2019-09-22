@@ -23,10 +23,10 @@ void roll(boolean toMotor = true) {
   }
 
   boolean hit_endpoint = false;
-  int timeout = 10000;
+  int timeout = millis() + 30*1000;
 
   // Move while we want to
-  while (hit_endpoint == false && timeout > 0) {
+  while (hit_endpoint == false && millis() < timeout) {
     timeout--;
 
     if (DEBUG == true) {
