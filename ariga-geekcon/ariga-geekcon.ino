@@ -8,6 +8,7 @@ int MOTOR_SPEED = 255;
 int MOTOR_ENABLE_PIN = A6;
 
 int ENDSTOPS_PINS[2] = { 9, 10 };
+int MOVEMENT_MAX_INTERVAL = 30 * 1000; // Milliseconds. Timeout in case the motor is misbehaving.
 
 int TARGET_PIN = 12;
 
@@ -23,7 +24,7 @@ void roll(boolean toMotor = true) {
   }
 
   boolean hit_endpoint = false;
-  int timeout = millis() + 30*1000;
+  int timeout = millis() + MOVEMENT_MAX_INTERVAL;
 
   // Move while we want to
   while (hit_endpoint == false && millis() < timeout) {
