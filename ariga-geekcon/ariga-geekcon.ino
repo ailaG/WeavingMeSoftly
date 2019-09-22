@@ -23,7 +23,7 @@ void roll(boolean toMotor = true) {
   }
 
   boolean hit_endpoint = false;
-  int timeout = 1000;
+  int timeout = 10000;
 
   // Move while we want to
   while (hit_endpoint == false && timeout > 0) {
@@ -33,8 +33,9 @@ void roll(boolean toMotor = true) {
       Serial.println("ROLL");
     }
     
-    hit_endpoint = digitalRead(ENDSTOPS_PINS[0]) == HIGH || digitalRead(ENDSTOPS_PINS[1]) == HIGH; // messy
-
+    //hit_endpoint = digitalRead(ENDSTOPS_PINS[0]) == HIGH || digitalRead(ENDSTOPS_PINS[1]) == HIGH; // messy
+    hit_endpoint = (digitalRead(ENDSTOPS_PINS[1]) == HIGH && toMotor == true) || (digitalRead(ENDSTOPS_PINS[0]) == HIGH && toMotor == false);
+    
     if (DEBUG == true) {
       if (hit_endpoint)
         Serial.print("HIT ");
@@ -56,7 +57,11 @@ void roll(boolean toMotor = true) {
       digitalWrite(MOTOR_DIR_PINS[1], HIGH);
     }
     // Finished step, continue while loop
-  }
+  } // end while running
+
+  digitalWrite(MOTOR_DIR_PINS[0], LOW);
+  digitalWrite(MOTOR_DIR_PINS[1], LOW);
+  
   
   if (DEBUG == true) {
     Serial.print("finished rolling. hit endpoint?");
@@ -69,12 +74,7 @@ void roll(boolean toMotor = true) {
 
 }
 
-void stopRoll() {
-  if (DEBUG == true)
-    Serial.println("STOP");
-   digitalWrite(MOTOR_DIR_PINS[0], LOW);
-   digitalWrite(MOTOR_DIR_PINS[1], LOW);
-}
+
 
 boolean was_target_hit() {
   if (DEBUG == true) {
@@ -107,6 +107,9 @@ void setup() {
   }
   
   analogWrite(MOTOR_SPEED_PIN, MOTOR_SPEED);
+
+  // Home the loom frame
+  roll(true);
 }
 
 void loop() {
@@ -124,10 +127,6 @@ void loop() {
 
   headed_to_motor = !headed_to_motor;
   roll(headed_to_motor);
-  stopRoll();
-  //delay(500);
-  
-
   
   
 }
